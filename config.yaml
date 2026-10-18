@@ -1,0 +1,62 @@
+# Configuration for AML-Based Room Identifier (All Indoor Room Categories)
+
+project:
+  name: "AML-Based Room Identifier"
+  seed: 42
+  device: "cuda"  # "cuda", "cpu", or "auto"
+
+dataset:
+  raw_dir: "Dataset"
+  processed_dir: "data/processed"
+  custom_dir: "data/custom"
+  train_split: 0.70
+  val_split: 0.15
+  test_split: 0.15
+  image_size: 224
+  num_workers: 2
+  batch_size: 32
+  # Mapping from MIT raw folder names to standardized room classes
+  folder_mapping:
+    bathroom: "bathroom"
+    bedroom: "bedroom"
+    children_room: "children_room"
+    closet: "closet"
+    corridor: "hallway"
+    dining_room: "dining_room"
+    kitchen: "kitchen"
+    livingroom: "living_room"
+    office: "office"
+    meeting_room: "office"
+
+model:
+  backbone: "mobilenet_v2"  # "mobilenet_v2" or "resnet18"
+  pretrained: true
+  dropout_rate: 0.3
+  checkpoint_path: "models/best_model.pt"
+
+training:
+  use_class_weights: true
+  phase1:
+    epochs: 5
+    lr: 0.001
+    weight_decay: 0.0001
+    freeze_backbone: true
+  phase2:
+    epochs: 18
+    lr: 0.0001
+    weight_decay: 0.0001
+    unfreeze_layers: 5  # Unfreeze last 5 feature blocks for fine-tuning
+  scheduler:
+    factor: 0.5
+    patience: 2
+    min_lr: 0.000001
+  early_stopping:
+    patience: 6
+    min_delta: 0.001
+
+outputs:
+  dir: "outputs"
+  training_curves: "outputs/training_curves.png"
+  confusion_matrix: "outputs/confusion_matrix.png"
+  metrics_json: "outputs/metrics.json"
+  results_md: "outputs/RESULTS.md"
